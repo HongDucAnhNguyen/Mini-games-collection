@@ -6,8 +6,8 @@
 #include <SFML/Network.hpp>
 
 #include "Player.h"
-#include "Enemy.h"
 #include "Bullet.h"
+#include "Enemy.h"
 #include "Framerate.h"
 #include "Math.h"
 #include "SpaceRock.h"
@@ -23,7 +23,8 @@ private:
 	/*state variables*/
 
 	sf::Uint32 currentState;
-
+	float randomEnemyCanBeSelectedCoolDown;
+	float randomEnemyCanBeSelectedCoolDownMax;
 
 
 	//game states
@@ -50,22 +51,29 @@ private:
 	sf::Event event;
 	sf::Clock clock;
 	sf::Sprite gameOverSprite;
+	sf::Sprite backgroundSprite;
 	sf::Texture gameOverTexture;
+	sf::Texture backgroundTexture;
 	sf::SoundBuffer gameOverSoundBuffer;
 	sf::Sound gameOverSound;
 	bool gameOverSoundPlaying;
 	float delta_time;
 	float spawnTimer;
 	float spawnTimerMax;
+	float enemiesDirectionX;
 	Player* player;
 	Framerate* frameRate;
 	Math* math;
 
 
+
 	//textures container for the game
 	std::map<std::string, sf::Texture*> textures;
 	std::vector<Bullet*> bullets;
+	std::vector<Bullet*> enemyBullets;
 	std::vector<SpaceRock*> spaceRocks;
+
+
 	std::vector<Enemy*> enemies;
 
 	/*Game entities variables*/
@@ -85,8 +93,9 @@ private:
 	void createPlayer();
 	void createFramerateInformation();
 	void createMathSystem();
-
-	Enemy* createEnemy(float posX, float posY);
+	void moveDownRowEnemies();
+	bool randomEnemyCanBeSelected();
+	Enemy* createEnemy(int enemyLevel, float posX, float posY);
 	SpaceRock* createSpaceRock(float pos_x, float pos_y);
 
 
@@ -102,12 +111,15 @@ public:
 	void run();
 	void updatePollEvents();
 	void updateInputs();
-	void updateBullets();
+	void updateBullets(std::vector<Bullet*>& bullets);
 	void updateSpaceRocks();
 	void updateEnemies();
+
 	void updateCombatOfEnemiesAndBullets();
+	void updateCombatOfEnemiesAndPlayer();
 	void updateCombatOfSpaceRocksAndBullets();
 	const bool getGameOverStatus() const;
+
 
 
 	//constructors/Destructors

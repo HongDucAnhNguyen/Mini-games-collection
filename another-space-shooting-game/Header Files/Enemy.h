@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-
 class Enemy
 {
 
@@ -9,20 +8,20 @@ private:
 	sf::Texture enemyTexture;
 	sf::Font font;
 	sf::Text healthText;
-
-
+	float shootingCooldown;
+	float shootingCooldownMax;
 
 	int hpMax;
 	int hp;
-	int damage;
 	int points_gained_when_killed;
 	int level;
 	float enemySpeed;
 	sf::RectangleShape boundingRect;
 
 
-public:
 
+public:
+	static sf::Texture enemyTextures[3];
 
 
 private:
@@ -36,19 +35,24 @@ private:
 
 
 public:
-	Enemy(float posX, float posY);
+	Enemy(int enemyLevel, float posX, float posY);
 	~Enemy();
 
-	void update();
+	void update(float directionX, float directionY);
 	void render(sf::RenderWindow& window);
 	void move(const float dirX, const float dirY);
-
+	void moveDownRow();
 	const int getEnemyPoints() const;
 	const float getCurrentSpeed() const;
 	const sf::FloatRect getBounds() const;
 	const sf::FloatRect getHitBoxBounds() const;
+	const sf::Vector2f getCurrentPos() const;
+	bool enemyCanShoot();
+
+
 	const int getHp() const;
 	void setHp(int newHp);
+	void increaseSpeed();
 
 };
 

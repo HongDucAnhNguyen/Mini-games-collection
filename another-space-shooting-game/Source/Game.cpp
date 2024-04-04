@@ -6,15 +6,15 @@
 
 
 
-/*=====================================GAME UPDATES=====================================*/
+/*=====================================GAME INITS=====================================*/
 /*Game entities creation*/
 void Game::createPlayer()
 {
 	this->player = new Player(*(this->window));
 }
-Enemy* Game::createEnemy(float posX, float posY)
+Enemy* Game::createEnemy(int enemyLevel, float posX, float posY)
 {
-	return new Enemy(posX, posY);
+	return new Enemy(enemyLevel, posX, posY);
 }
 
 void Game::createFramerateInformation() {
@@ -34,7 +34,7 @@ SpaceRock* Game::createSpaceRock(float pos_x, float pos_y) {
 
 void Game::initWindow()
 {
-	this->window = new sf::RenderWindow(sf::VideoMode(800, 800), "another space shooting game");
+	this->window = new sf::RenderWindow(sf::VideoMode(1200, 900), "another space shooting game");
 	this->window->setFramerateLimit(60);
 	this->window->setVerticalSyncEnabled(false);
 
@@ -43,7 +43,19 @@ void Game::initWindow()
 
 }
 void Game::initTextures()
+
+
+
 {
+
+
+
+
+
+
+
+
+
 	this->textures["BULLET"] = new sf::Texture();
 	if (this->textures["BULLET"]->loadFromFile("game_assets/bullet.png")) {
 
@@ -68,20 +80,57 @@ void Game::initSpaceRocks()
 
 void Game::initEnemies() {
 
+	int enemyLevelType = 0;
 
 
-	for (int i = 0; i < 8; i++) {
-		if (i == 0) {
-			this->enemies.push_back(this->createEnemy(10, 300));
+	for (int row = 0; row < 5; row++) {
+
+
+		for (int column = 0; column < 11; column++) {
+
+			float enemyPosX = column * 70 + 250;
+			float enemyPosY = row * 70 + 100;
+
+			if (row == 0) {
+
+				enemyLevelType = 3;
+
+
+			}
+			else if (row == 1 || row == 2) {
+
+				enemyLevelType = 2;
+
+			}
+			else {
+
+				enemyLevelType = 1;
+			}
+
+
+
+			this->enemies.push_back(this->createEnemy(enemyLevelType, enemyPosX, enemyPosY));
+
+
 		}
-		else {
 
-			float posX = this->enemies[i - 1]->getBounds().left + this->enemies[i - 1]->getBounds().width + 30;
-			this->enemies.push_back(this->createEnemy(
-				posX,
-				300));
-		}
 
+	}
+}
+
+
+bool Game::randomEnemyCanBeSelected() {
+	if (this->randomEnemyCanBeSelectedCoolDown >= this->randomEnemyCanBeSelectedCoolDownMax) {
+		this->randomEnemyCanBeSelectedCoolDown = 0;
+		return true;
+	}
+	return false;
+}
+
+void Game::moveDownRowEnemies()
+{
+	for (int i = this->enemies.size() - 1; i >= 0; i--) {
+		this->enemies[i]->moveDownRow();
 	}
 }
 
@@ -97,7 +146,7 @@ void Game::initGameOverState() {
 
 
 
-	this->gameOverTexture.loadFromFile("game_assets/game over.png");
+	this->gameOverTexture.loadFromFile("game_assets/game over.jpg");
 	this->gameOverSprite.setTexture(this->gameOverTexture);
 
 	this->gameOverSprite.setTextureRect(sf::IntRect(0, 0, this->window->getSize().x, this->window->getSize().y));
@@ -122,13 +171,27 @@ const bool Game::getGameOverStatus() const {
 
 /*=====================================GAME CONSTRUCTOR/DESTRUCTOR=====================================*/
 Game::Game() : window(nullptr), delta_time(0), player(nullptr),
-frameRate(nullptr), math(nullptr), gameOverSoundPlaying(false)
+frameRate(nullptr), math(nullptr), gameOverSoundPlaying(false), enemiesDirectionX(1),
+randomEnemyCanBeSelectedCoolDown(30), randomEnemyCanBeSelectedCoolDownMax(30)
+
 {
+
 
 
 
 	this->initWindow();
 	this->initTextures();
+
+	if (this->backgroundTexture.loadFromFile("game_assets/background.jpg")) {
+
+		std::cout << "loaded background texture" << std::endl;
+	}
+	else std::cout << "cannot load background texture" << std::endl;
+	this->backgroundSprite.setTexture(this->backgroundTexture);
+	this->gameOverSprite.setTextureRect(sf::IntRect(0, 0, this->window->getSize().x, this->window->getSize().y));
+
+
+
 	this->createPlayer();
 	this->createFramerateInformation();
 	this->createMathSystem();
@@ -159,6 +222,12 @@ Game::~Game()
 
 		delete i;
 	}
+	//delete enemy bullets
+	for (auto* i : this->enemyBullets) {
+
+		delete i;
+	}
+
 	//delete space rocks
 	for (auto* i : this->spaceRocks) {
 
@@ -259,20 +328,20 @@ void Game::updateInputs()
 
 	}
 }
-void Game::updateBullets() {
-	for (int index_offset = this->bullets.size() - 1; index_offset >= 0; index_offset--) {
-		if (this->bullets[index_offset]->getBounds().top + this->bullets[index_offset]->getBounds().height < 0) {
+void Game::updateBullets(std::vector<Bullet*>& bullets) {
+	for (int index_offset = bullets.size() - 1; index_offset >= 0; index_offset--) {
+		if (bullets[index_offset]->getBounds().top + bullets[index_offset]->getBounds().height < 0) {
 
-			delete this->bullets.at(index_offset);
+			delete bullets.at(index_offset);
 
-			this->bullets.erase(this->bullets.begin() + index_offset);
+			bullets.erase(bullets.begin() + index_offset);
 
-			std::cout << "deleted bullet" << std::endl;
+
 
 
 		}
 		else {
-			this->bullets[index_offset]->update(this->delta_time);
+			bullets[index_offset]->update(this->delta_time);
 		}
 		//move the bullet
 	}
@@ -293,14 +362,106 @@ void Game::updateSpaceRocks() {
 }
 
 void Game::updateEnemies() {
+
+	if (this->randomEnemyCanBeSelected()) {
+		int randomIndex = rand() % this->enemies.size();
+
+		Enemy* randomEnemy = this->enemies[randomIndex];
+		if (randomEnemy->enemyCanShoot()) {
+			this->enemyBullets.push_back(
+				new Bullet(this->textures["BULLET"], this->enemies[randomIndex]->getCurrentPos(), sf::Vector2f(0, 1), .5)
+			);
+		}
+	}
+
+
+
 	for (int i = this->enemies.size() - 1; i >= 0; i--)
 	{
 		if (this->enemies[i]->getHp() > 0) {
-			this->enemies[i]->update();
+
+
+
+
+			if (this->enemies[i]->getBounds().left + this->enemies[i]->getBounds().width >=
+				this->window->getSize().x) {
+
+				this->moveDownRowEnemies();
+
+				this->enemiesDirectionX = -1;
+
+
+
+			}
+			if (this->enemies[i]->getBounds().left < 0) {
+
+				this->moveDownRowEnemies();
+
+
+				this->enemiesDirectionX = 1;
+
+
+			}
+
+
+			this->enemies[i]->update(this->enemiesDirectionX, 0);
+
+
 
 		}
 	}
 }
+
+
+
+void Game::updateCombatOfEnemiesAndPlayer() {
+
+
+	for (int index_offset = this->enemies.size() - 1; index_offset >= 0; index_offset--) {
+
+		if (math->checkAABBCollision(this->enemies[index_offset]->getBounds(),
+			this->player->getBounds())) {
+
+			this->player->setHp(0);
+
+		}
+	}
+
+	for (int index_offset = this->enemyBullets.size() - 1; index_offset >= 0; index_offset--) {
+
+
+
+
+
+		if (math->checkAABBCollision(this->enemyBullets[index_offset]->getBounds(),
+			this->player->getBounds())) {
+
+
+
+			if (this->player->getHp() <= 0) {
+				this->player->setHp(0);
+
+
+			}
+
+
+
+			else {
+				this->player->setHp(this->player->getHp() - 8);
+			}
+
+			delete this->enemyBullets.at(index_offset);
+
+			this->enemyBullets.erase(this->enemyBullets.begin() + index_offset);
+
+
+		}
+
+	}
+
+};
+
+
 
 
 void Game::updateCombatOfEnemiesAndBullets()
@@ -337,6 +498,7 @@ void Game::updateCombatOfEnemiesAndBullets()
 
 
 				else {
+
 					this->enemies[i]->setHp(this->enemies[i]->getHp() - this->player->getDamage());
 				}
 
@@ -344,7 +506,6 @@ void Game::updateCombatOfEnemiesAndBullets()
 
 				this->bullets.erase(this->bullets.begin() + index_offset);
 
-				std::cout << "deleted bullet" << std::endl;
 
 			}
 
@@ -442,7 +603,10 @@ void Game::update()
 
 
 
+	if (this->randomEnemyCanBeSelectedCoolDown < this->randomEnemyCanBeSelectedCoolDownMax) {
 
+		this->randomEnemyCanBeSelectedCoolDown += 1;
+	}
 
 	this->updatePollEvents();
 
@@ -478,8 +642,10 @@ void Game::update()
 		this->updateSpaceRocks();
 		this->updateEnemies();
 		this->updateCombatOfEnemiesAndBullets();
+		this->updateCombatOfEnemiesAndPlayer();
 		this->updateCombatOfSpaceRocksAndBullets();
-		this->updateBullets();
+		this->updateBullets(this->bullets);
+		this->updateBullets(this->enemyBullets);
 
 	}
 
@@ -512,6 +678,11 @@ void Game::render()
 
 	if (this->getGameOverStatus() == false) {
 
+
+		this->window->draw(this->backgroundSprite);
+
+
+
 		this->player->render(*(this->window));
 
 
@@ -530,6 +701,10 @@ void Game::render()
 		for (auto* bullet : this->bullets) {
 
 			bullet->render(*(this->window));
+		}
+		for (auto* enemyBullet : this->enemyBullets) {
+
+			enemyBullet->render(*(this->window));
 		}
 
 		this->frameRate->render(*(this->window));
