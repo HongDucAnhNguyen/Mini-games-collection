@@ -6,4 +6,6 @@ As if the world doesn't already have enough space invaders clones.
 - Asteroids that cause damage, dodge them or destroy to get points
 - Alien enemies that tries to kill you, don't let them get near! Shoot em' up!
 
-![image](https://github.com/HongDucAnhNguyen/Mini-games-collection/assets/96758088/879cb37e-a03d-407a-b255-1e1748e9ba24)
+
+https://github.com/HongDucAnhNguyen/Mini-games-collection/assets/96758088/cb45f8e2-5ebd-48e5-ae7c-c567a92fb035
+
