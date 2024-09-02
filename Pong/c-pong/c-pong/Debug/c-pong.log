@@ -1,10 +1,10 @@
 ﻿  game.h
   ball.c
   game.c
+C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\C programming\Pong\c-pong\c-pong\source\game.c(87,8): warning C4244: 'function': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\C programming\Pong\c-pong\c-pong\source\game.c(227,47): warning C4020: 'SDL_CreateRenderer': too many actual parameters
   main.c
-C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\Game Development\game-collection-github-public\Pong\c-pong\c-pong\source\main.c(111,8): warning C4244: 'function': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\Game Development\game-collection-github-public\Pong\c-pong\c-pong\source\main.c(262,47): warning C4020: 'SDL_CreateRenderer': too many actual parameters
-C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\Game Development\game-collection-github-public\Pong\c-pong\c-pong\source\main.c(461,16): warning C4026: function declared with formal parameter list
+C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\C programming\Pong\c-pong\c-pong\source\main.c(26,16): warning C4026: function declared with formal parameter list
   Generating Code...
 Debug\game.obj : warning LNK4042: object specified more than once; extras ignored
-  c-pong.vcxproj -> C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\Game Development\game-collection-github-public\Pong\c-pong\Debug\c-pong.exe
+  c-pong.vcxproj -> C:\Users\nguye\Downloads\OneDrive\Desktop\software eng\Software Engineering\Development\C programming\Pong\c-pong\Debug\c-pong.exe

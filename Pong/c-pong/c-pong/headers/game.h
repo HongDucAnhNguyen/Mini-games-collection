@@ -38,7 +38,9 @@ void run(void);
 void render_score(SDL_Renderer* renderer, TTF_Font* font, int score1, int score2);
 
 
-
+//macro for creating SDL rect which takes in generic Object type
+#define CREATE_RECT(obj) \
+    (SDL_Rect){ (int)(obj)->x, (int)(obj)->y, (int)(obj)->width, (int)(obj)->height }
 
 
 
